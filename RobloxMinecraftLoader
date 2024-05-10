@@ -2,4 +2,5 @@ loadstring(game:HttpGet("https://gist.githubusercontent.com/raw/b8d379c1e296ade8
 
 Then
 wait(0.1)
-local Library = loadstring(game:HttpGet("https://github.com/SumitScripts/Minecraft/blob/main/Play"))()
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/SumitScripts/Minecraft/main/Play"))()
