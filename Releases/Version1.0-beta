@@ -1,1 +1,582 @@
+-- https://web.roblox.com/games/7336477134/Minerscave
+local list = {}
+local list2 = {}
+table.clear(list)
+table.clear(list2)
 
+getgenv().killaura = false
+getgenv().killauraselect = false
+getgenv().killauranotselect = false
+getgenv().unvoid = false
+getgenv().placeholder1 = false
+getgenv().textloop = false
+local autoespores = nil
+local autoesplava = nil
+local x
+local y
+local z
+
+writefile("ItemStats.lua","")
+function add(file,strings)
+    appendfile(file,tostring(strings))
+    appendfile(file,[[
+
+]])
+end
+
+local selectedoption
+local selectedchar
+local Library = loadstring(game:HttpGet("https://pastebin.com/raw/vff1bQ9F"))()
+local Window = Library.CreateLib("Any Minecraft Game / SumitScripts Hub On Top", "DarkTheme")
+
+local A = Window:NewTab("Main")
+local A1 = A:NewSection("Main")
+local B = Window:NewTab("TP and other scripts")
+local B1 = B:NewSection("TP")
+local B2 = B:NewSection("Scripts")
+
+local drpdwn = A1:NewDropdown("all blocks", "im not manually doing that", {"placeholder for update thing"}, function(value1)
+    selectedoption = value1
+    print(selectedoption)
+end)
+
+A1:NewButton("show selected blocks", "might lag hard", function()
+    game:GetService("StarterGui"):SetCore("SendNotification", { 
+    Title = "some info",
+    Text = ("most blocks dont have color")
+    })
+    local folder = Instance.new("Folder")
+    folder.Parent = game.CoreGui
+    folder.Name = "selected block esp things"
+    for i,v in pairs(game.Workspace:GetDescendants()) do
+        if v.Name == (selectedoption) then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Parent = game:GetService("CoreGui")["selected block esp things"]
+            box.Color3 = v.Color
+            box.Size = v.Size
+            box.ZIndex = 10
+            box.Adornee = v
+            box.Name = v.Name
+            box.AlwaysOnTop = true
+            box.Visible = true
+            box.Transparency = 0.5
+        end
+    end
+end)
+
+A1:NewButton("stop showing selected blocks", "might lag hard", function()
+    for i,v in pairs(game.CoreGui:GetChildren()) do
+        if v.Name == "selected block esp things" then
+            v:Destroy()
+        end
+    end
+end)
+
+A1:NewButton("break selected blocks around you", "buggy!!", function()
+    for i,v in pairs(game:GetService("Workspace").Blocks:GetDescendants()) do
+        if v.ClassName == "Part" or v.ClassName == "MeshPart" and v.Name == (selectedoption) then
+            if game.Players.LocalPlayer:DistanceFromCharacter(v.Position) < 16 then
+                local A_1 = (v.Position.X/3)
+                local A_2 = (v.Position.Y/3)
+                local A_3 = (v.Position.Z/3)
+                local Event = game:GetService("ReplicatedStorage").GameRemotes.BreakBlock
+                Event:FireServer(A_1, A_2, A_3)
+                wait(.5)
+                local Event = game:GetService("ReplicatedStorage").GameRemotes.AcceptBreakBlock
+                Event:InvokeServer()
+            end
+        end
+    end
+end)
+
+local drpdwn2 = A1:NewDropdown("all players", "im not manually doing that", {"placeholder for update thing"}, function(value1)
+    selectedchar = value1
+    print(selectedchar)
+end)
+
+A1:NewButton("update all players dropdown", "press it alot", function()
+    table.clear(list2)
+    for i,v in pairs(game.Players:GetPlayers()) do
+        if v.Name ~= game.Players.LocalPlayer.Name and v.Character then
+            table.insert(list2,v.Name)
+        end
+    end
+    drpdwn2:Refresh(list2)
+end)
+
+A1:NewToggle("killaura (selected)", "killaura", function(bool)
+    getgenv().killauraselect = bool
+    if bool then
+        killauraselect()
+    else
+        print("killaura off")
+    end
+end)
+
+A1:NewToggle("killaura (not selected)", "killaura", function(bool)
+    getgenv().killauranotselect = bool
+    if bool then
+        notkillauraselect()
+    else
+        print("killaura off")
+    end
+end)
+
+A1:NewToggle("auto unvoid", "might need no fall damage", function(bool)
+    getgenv().unvoid = bool
+    if bool then
+        unvoid()
+    end
+end)
+
+A1:NewButton("get all recipes", "what is rainbowitefarmingtool", function()
+    local senv = getsenv(game:GetService("Players").LocalPlayer.PlayerScripts.MainLocalScript)
+    hookfunction(senv.CheckIfRecipeAllowed, function(...)
+        return true
+    end)
+end)
+
+A1:NewSlider("extend crafting recipes", "original value is 36", 50, 0, function(clength)
+    game:GetService("Players").LocalPlayer.PlayerGui.HUDGui.Inventory.CraftingBook.ScrollingFrame.UIGridLayout.CellSize = UDim2.new(0,36,0,clength)
+end)
+
+A1:NewSlider("max zoom", "original value is 0.5", 100000, 0.5, function(mzlength)
+    game:GetService("Players").LocalPlayer.CameraMaxZoomDistance = mzlength
+end)
+
+A1:NewSlider("minimum zoom", "original value is 0.5", 100000, 0.5, function(mzlength)
+    game:GetService("Players").LocalPlayer.CameraMinZoomDistance = mzlength
+end)
+
+A1:NewButton("show ores", "guys these are legit", function()
+    game:GetService("StarterGui"):SetCore("SendNotification", { 
+    Title = "some info",
+    Text = ("lava = orange, ruby = red, so dont confuse those")
+    })
+    for i,v in pairs(game.CoreGui:GetChildren()) do
+        if v.Name == "block esp things" then
+            v:Destroy()
+        end
+    end
+    local folder = Instance.new("Folder")
+    folder.Parent = game.CoreGui
+    folder.Name = "block esp things"
+    autoespores = game.Workspace.Blocks.DescendantAdded:Connect(function(v)
+        if v.Name == "CoalOre" or v.Name == "RainbowiteOre" or v.Name == "RubyOre" or v.Name == "GoldOre" or v.Name == "DiamondOre" or v.Name == "IronOre" or v.Name == "SapphireOre" or v.Name == "SteelOre" then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Parent = folder
+            box.Color3 = v.Color
+            box.Size = v.Size
+            box.ZIndex = 10
+            box.Adornee = v
+            box.Name = v.Name
+            box.AlwaysOnTop = true
+            box.Visible = true
+            box.Transparency = 0.5
+        end
+    end)
+    for i,v in pairs(game.Workspace:GetDescendants()) do
+        if v.Name == "CoalOre" or v.Name == "RainbowiteOre" or v.Name == "RubyOre" or v.Name == "GoldOre" or v.Name == "DiamondOre" or v.Name == "IronOre" or v.Name == "SapphireOre" or v.Name == "SteelOre" then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Parent = folder
+            box.Color3 = v.Color
+            box.Size = v.Size
+            box.ZIndex = 10
+            box.Adornee = v
+            box.Name = v.Name
+            box.AlwaysOnTop = true
+            box.Visible = true
+            box.Transparency = 0.5
+        end
+    end
+end)
+
+A1:NewButton("stop showing ores", "ayo", function()
+    for i,v in pairs(game.CoreGui:GetChildren()) do
+        if v.Name == "block esp things" then
+            v:Destroy()
+        end
+    end
+    if autoespores ~= nil then
+        autoespores = nil
+    end
+end)
+
+A1:NewButton("show lava", "no worry!!", function()
+    for i,v in pairs(game.CoreGui:GetChildren()) do
+        if v.Name == "lava esp things" then
+            v:Destroy()
+        end
+    end
+    local folder = Instance.new("Folder")
+    folder.Parent = game.CoreGui
+    folder.Name = "lava esp things"
+    autoesplava = game.Workspace.Blocks.DescendantAdded:Connect(function(v)
+        if v.Name == "Lava" then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Parent = folder
+            box.Color3 = Color3.fromRGB(213, 115, 61)
+            box.Size = v.Size
+            box.ZIndex = 10
+            box.Adornee = v
+            box.Name = v.Name
+            box.AlwaysOnTop = true
+            box.Visible = true
+            box.Transparency = 0.5
+        end
+    end)
+    for i,v in pairs(game.Workspace:GetDescendants()) do
+        if v.Name == "Lava" then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Parent = folder
+            box.Color3 = Color3.fromRGB(213, 115, 61)
+            box.Size = v.Size
+            box.ZIndex = 10
+            box.Adornee = v
+            box.Name = v.Name
+            box.AlwaysOnTop = true
+            box.Visible = true
+            box.Transparency = 0.5
+        end
+    end
+end)
+
+A1:NewButton("stop showing lava", "worry!!", function()
+    for i,v in pairs(game.CoreGui:GetChildren()) do
+        if v.Name == "lava esp things" then
+            v:Destroy()
+        end
+    end
+    if autoesplava ~= nil then
+        autoesplava = nil
+    end
+end)
+
+A1:NewButton("no fall damage", "no worry 2!!", function()
+    game:GetService("ReplicatedStorage").GameRemotes.Demo:Destroy()
+end)
+
+A1:NewButton("get item stats", "l", function()
+    local req1 = require(game:GetService("ReplicatedStorage").AssetsMod.ItemLevels)
+    for i,v in pairs(req1) do
+        if type(v) == "table" then
+            if i == "axeR" then
+                add("ItemStats.lua","Chopping:")
+                for i,v in pairs(v) do
+                    if string.len(tostring(v)) == 1 then
+                        v = tostring(v).."0"
+                    end
+                    if string.len(tostring(v)) == 3 then
+                        v = tostring(v*10)
+                    end
+                    v = "0."..tostring(v).." Seconds"
+                    add("ItemStats.lua",i..": "..v)
+                end
+                add("ItemStats.lua","---------------------------------------")
+            end
+            if i == "pickaxeR" then
+                add("ItemStats.lua","Mining Stone:")
+                for i,v in pairs(v) do
+                    if string.len(tostring(v)) == 1 then
+                        v = "0"..tostring(v)
+                    end
+                    v = "0."..tostring(v).." Seconds"
+                    add("ItemStats.lua",i..": "..v)
+                end
+                add("ItemStats.lua","---------------------------------------")
+            end
+            if i == "speedMul" then
+                add("ItemStats.lua","Speed Multiplier:")
+                for i,v in pairs(v) do
+                    add("ItemStats.lua",i..": "..v)
+                end
+                add("ItemStats.lua","---------------------------------------")
+            end
+        end
+    end
+    game:GetService("StarterGui"):SetCore("SendNotification", { 
+    Title = "howto go to file",
+    Text = ("go to your executor's workspace and then find ItemStats.lua, then open it")
+    })
+end)
+
+A1:NewToggle("killaura", "killaura", function(bool)
+    getgenv().killaura = bool
+    if bool then
+        killaura()
+    else
+        print("killaura off")
+    end
+end)
+
+A1:NewToggle("show hand/item", "or not", function(bool)
+    if bool then
+        for i,v in pairs(game:GetService("Workspace").Camera:GetChildren()) do
+            if v.ClassName ~= "BlurEffect" then
+                v["Right Arm"].Transparency = 0
+            end
+        end
+    else
+        for i,v in pairs(game:GetService("Workspace").Camera:GetChildren()) do
+            if v.ClassName ~= "BlurEffect" then
+                v["Right Arm"].Transparency = 1
+            end
+        end
+    end
+end)
+
+
+A1:NewToggle("esp", "esp", function(bool)
+    if bool then
+        for i,v in pairs(game.CoreGui:GetChildren()) do
+            if v.Name == "playeresp" then
+                v:Destroy()
+            end
+        end
+        local folder = Instance.new("Folder")
+        folder.Parent = game.CoreGui
+        folder.Name = "playeresp"
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if v ~= game.Players.LocalPlayer then
+                for i,v in pairs(v.Character:GetChildren()) do
+                    if v:IsA("BasePart") then
+                        local box = Instance.new("BoxHandleAdornment")
+                        box.Parent = folder
+                        box.Color3 = v.Color
+                        box.Size = v.Size
+                        box.ZIndex = 10
+                        box.Adornee = v
+                        box.Name = v.Name
+                        box.AlwaysOnTop = true
+                        box.Visible = true
+                        box.Transparency = 0.5
+                    end
+                end
+            end
+        end
+        getgenv().textloop = bool
+        for i,v in pairs(game.CoreGui:GetChildren()) do
+            if v.Name == "playeresptexttest" then
+                v:Destroy()
+            end
+        end
+        wait(1)
+        local folder = Instance.new("Folder")
+        folder.Parent = game.CoreGui
+        folder.Name = "playeresptext"
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if v ~= game.Players.LocalPlayer and v.Character.Head and v.Character.Humanoid then
+                local bbgui = Instance.new("BillboardGui")
+                bbgui.Name = "playeresptext"
+                bbgui.Adornee = v.Character.Head
+                bbgui.Parent = folder
+                bbgui.AlwaysOnTop = true
+                bbgui.Name = v.Name
+                bbgui.Size = UDim2.new(0, 500, 0, 10)
+                local text = Instance.new("TextLabel")
+                text.Parent = bbgui
+                text.TextSize = 10
+                text.Name = v.Name
+                text.Size = UDim2.new(0, 500, 0, 10)
+                text.BackgroundTransparency = 1
+                text.TextColor3 = Color3.fromRGB(v.TeamColor.Color.R*255,game.Players.LocalPlayer.TeamColor.Color.G*255,game.Players.LocalPlayer.TeamColor.Color.B*255)
+				text.Text = ("Name: ".. v.Name.. " Health: ".. math.floor(v.Character.Humanoid.Health).. " Studs: ".. math.floor(game.Players.LocalPlayer:DistanceFromCharacter(v.Character.HumanoidRootPart.Position)))
+				function textloop()
+                    spawn(function()
+                        while getgenv().textloop do
+                            if v ~= game.Players.LocalPlayer and v.Character.Head and v.Character.Humanoid then
+								text.Text = ("Name: ".. v.Name.. " Health: ".. math.floor(v.Character.Humanoid.Health).. " Studs: ".. math.floor(game.Players.LocalPlayer:DistanceFromCharacter(v.Character.HumanoidRootPart.Position)))
+								wait()
+                            end
+                        end
+                    end)
+                end
+                if getgenv().textloop then
+                    textloop()
+                end
+            end
+        end
+    else
+        wait(.1)
+        for i,v in pairs(game.CoreGui:GetChildren()) do
+            if v.Name == "playeresp" then
+                v:Destroy()
+            end
+        end
+        wait(.1)
+        for i,v in pairs(game.CoreGui:GetChildren()) do
+            if v.Name == "playeresptext" then
+                v:Destroy()
+            end
+        end
+    end
+end)
+
+
+A1:NewKeybind("gui", "gui", Enum.KeyCode.RightControl, function()
+	Library:ToggleUI()
+end)
+
+B1:NewLabel([[tip: you can do "~" for your coordinate]])
+
+B1:NewTextBox("X", "x pos", function(txt)
+    if txt == "~" then
+        x = game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X
+    elseif string.find(txt,"~") and txt ~= "~" then
+        if string.sub(txt,1,1) == "~" then
+            x = tonumber(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z+(tonumber(string.sub(txt,2))*3))
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", { 
+            Title = "bruh",
+            Text = ("put the ~ symbol before the numbers")
+            })
+        end
+    else
+        x = tonumber(txt)*3
+    end
+    print(x)
+end)
+
+B1:NewTextBox("Y", "y pos", function(txt)
+    if txt == "~" then
+        y = game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y
+    elseif string.find(txt,"~") and txt ~= "~" then
+        if string.sub(txt,1,1) == "~" then
+            y = tonumber(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y+(tonumber(string.sub(txt,2))*3))
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", { 
+            Title = "bruh",
+            Text = ("put the ~ symbol before the numbers")
+            })
+        end
+    else
+        y = tonumber(txt)*3
+    end
+    print(y)
+end)
+
+B1:NewTextBox("Z", "z pos", function(txt)
+    if txt == "~" then
+        z = game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z
+    elseif string.find(txt,"~") and txt ~= "~" then
+        if string.sub(txt,1,1) == "~" then
+            z = tonumber(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z+(tonumber(string.sub(txt,2))*3))
+        else
+            game:GetService("StarterGui"):SetCore("SendNotification", { 
+            Title = "bruh",
+            Text = ("put the ~ symbol before the numbers")
+            })
+        end
+    else
+        z = tonumber(txt)*3
+    end
+    print(z)
+end)
+
+B1:NewButton("go to x,y,z (coordinates)", "in coordinates", function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(x,y,z)
+end)
+
+B2:NewButton("Infinite Yield", "very useful gui", function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+end)
+
+B2:NewButton("Dupe Gui And Xray", "very useful gui", function()
+    loadstring(game:HttpGet("https://gist.githubusercontent.com/raw/b8d379c1e296ade8305c2fe4df652537"))()
+end)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function killaura()
+    spawn(function()
+        while getgenv().killaura do
+            for i,v in pairs(game.Players:GetPlayers()) do
+                if v ~= game.Players.LocalPlayer and v.Character and game.Players.LocalPlayer:DistanceFromCharacter(v.Character.HumanoidRootPart.Position) < 16 then
+                    game.ReplicatedStorage.GameRemotes.Attack:InvokeServer(v.Character)
+                end
+            end
+            for i,v in pairs(game:GetService("Workspace").Animals:GetChildren()) do
+                if v:FindFirstChild("HumanoidRootPart") and game.Players.LocalPlayer:DistanceFromCharacter(v.HumanoidRootPart.Position) < 16 then
+                    game.ReplicatedStorage.GameRemotes.AttackMob:InvokeServer(v)
+                end
+            end
+            wait()
+        end
+    end)
+end
+
+function killauraselect()
+    spawn(function()
+        while getgenv().killauraselect do
+            for i,v in pairs(game.Players:GetPlayers()) do
+                if v ~= game.Players.LocalPlayer and v.Name == (selectedchar) and v.Character and game.Players.LocalPlayer:DistanceFromCharacter(v.Character.HumanoidRootPart.Position) < 16 then
+                    game.ReplicatedStorage.GameRemotes.Attack:InvokeServer(v.Character)
+                end
+            end
+            wait()
+        end
+    end)
+end
+
+function killauranotselect()
+    spawn(function()
+        while getgenv().killauranotselect do
+            for i,v in pairs(game.Players:GetPlayers()) do
+                if v ~= game.Players.LocalPlayer and v.Name ~= (selectedchar) and v.Character and game.Players.LocalPlayer:DistanceFromCharacter(v.Character.HumanoidRootPart.Position) < 16 then
+                    game.ReplicatedStorage.GameRemotes.Attack:InvokeServer(v.Character)
+                end
+            end
+            wait()
+        end
+    end)
+end
+
+
+function unvoid()
+    spawn(function()
+        while getgenv().unvoid do
+            if game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y <= -25 then
+                game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y+40)
+            end
+            wait()
+        end
+    end)
+end
+
+
+
+for i,v in pairs(game:GetService("ReplicatedFirst").Blocks:GetChildren()) do
+    if v.ClassName == "Part" or v.ClassName == "MeshPart" then
+        table.insert(list,v.Name)
+    end
+end
+
+
+drpdwn:Refresh(list)
+
+
+
+-- this disables infinite yield esp but not the names
+
+--[[
+for i,v in pairs(game:GetService("CoreGui"):GetChildren()) do
+    if v.ClassName == "Folder" and string.find(v.Name,"_ESP") then
+        for i,v in pairs(v:GetChildren()) do
+            if v.ClassName == "BoxHandleAdornment" then
+                v:Destroy()
+            end
+        end
+    end
+end
+]]
